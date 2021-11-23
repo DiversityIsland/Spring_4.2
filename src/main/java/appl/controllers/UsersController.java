@@ -41,7 +41,7 @@ public class UsersController {
         return "users/edit";
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public String updateUser(@ModelAttribute("user") User user, @PathVariable("id") Long id) {
         userService.updateUser(id, user);
 
