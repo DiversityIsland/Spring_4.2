@@ -22,7 +22,7 @@ public class UserDaoImp implements UserDao {
     @Override
     public User getUser(Long id) {
         return entityManager
-                .createQuery("select u from User u where u.id = :id", User.class)
+                .createQuery("select distinct u from User u left join fetch u.roles where u.id = :id", User.class)
                 .setParameter("id", id).getSingleResult();
     }
 
@@ -42,7 +42,16 @@ public class UserDaoImp implements UserDao {
     @Override
     public List<User> getAllUsers() {
         return entityManager
-                .createQuery("select u from User u", User.class)
+                .createQuery("select distinct u from User u left join fetch u.roles", User.class)
                 .getResultList();
+    }
+
+    //
+
+    @Override
+    public User getUserByUsername(String username) {
+        return entityManager
+                .createQuery("select distinct u from User u left join fetch u.roles where u.username = :username", User.class)
+                .setParameter("username", username).getSingleResult();
     }
 }
