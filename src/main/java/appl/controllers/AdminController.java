@@ -1,5 +1,6 @@
 package appl.controllers;
 
+import appl.config.DataInit;
 import appl.models.Role;
 import appl.models.User;
 import appl.service.UserService;
@@ -19,7 +20,7 @@ public class AdminController {
     private UserService userService;
 
     @Autowired
-    private PasswordEncoder encoder;
+    private DataInit init;
 
     @GetMapping("/new")
     public String newUser(Model model) {
@@ -37,16 +38,13 @@ public class AdminController {
     public String addUser(@ModelAttribute("user") User user,
                           @ModelAttribute("r_user") Boolean r_user,
                           @ModelAttribute("r_admin") Boolean r_admin) {
-        Set<Role> roles = new HashSet<>();
-
         if (r_user) {
-            roles.add(new Role("ROLE_USER"));
+            user.getRoles().add(init.R_USER);
         }
         if (r_admin) {
-            roles.add(new Role("ROLE_ADMIN"));
+            user.getRoles().add(init.R_ADMIN);
         }
-        user.setRoles(roles);
-        user.setPassword(encoder.encode(user.getPassword()));
+
         userService.addUser(user);
 
         return "redirect:/admin";
@@ -80,21 +78,16 @@ public class AdminController {
 
     @PutMapping("/{id}")
     public String updateUser(@ModelAttribute("user") User user,
-                             @ModelAttribute("r_user") Boolean r_user,
-                             @ModelAttribute("r_admin") Boolean r_admin,
+                             @ModelAttribute("r_user") String r_user,
+                             @ModelAttribute("r_admin") String r_admin,
                              @PathVariable("id") Long id) {
-        Set<Role> roles = new HashSet<>();
+        if (r_user.equals("r_user")) {
+            user.getRoles().add(init.R_USER);
+        }
+        if (r_admin.equals("r_admin")) {
+            user.getRoles().add(init.R_ADMIN);
+        }
 
-        if (r_user) {
-            roles.add(new Role("ROLE_USER"));
-        }
-        if (r_admin) {
-            roles.add(new Role("ROLE_ADMIN"));
-        }
-        user.setRoles(roles);
-        if ((!user.getPassword().startsWith("$2a$12$")) || (user.getPassword().length() != 60)) {
-            user.setPassword(encoder.encode(user.getPassword()));
-        }
         userService.updateUser(id, user);
 
         return "redirect:/admin";

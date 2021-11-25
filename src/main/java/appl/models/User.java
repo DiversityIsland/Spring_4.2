@@ -2,11 +2,11 @@ package appl.models;
 
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -15,7 +15,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", unique = true)
+    @Column(name = "username"/*, unique = true*/)
     private String username;
 
     @Column(name = "password")
@@ -30,11 +30,22 @@ public class User implements UserDetails {
     @Column(name = "age")
     private Integer age;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "roles_id")
-    private Set<Role> roles;
+    @ManyToMany(/*cascade = CascadeType.ALL,*/ fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     public User() {}
+
+    public User(String username, String password,
+                String name, String surname, Integer age) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.surname = surname;
+        this.age = age;
+    }
 
     public User(String username, String password,
                 String name, String surname, Integer age, Set<Role> roles) {

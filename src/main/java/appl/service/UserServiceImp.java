@@ -4,6 +4,7 @@ import appl.dao.UserDao;
 import appl.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,13 @@ public class UserServiceImp implements UserService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
     @Transactional
     @Override
     public void addUser(User user) {
+        user.setPassword(encoder.encode(user.getPassword()));
         userDao.addUser(user);
     }
 
@@ -30,6 +35,10 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void updateUser(Long id, User updatedUser) {
+        if ((!updatedUser.getPassword().startsWith("$2a$12$")) ||
+                (updatedUser.getPassword().length() != 60)) {
+            updatedUser.setPassword(encoder.encode(updatedUser.getPassword()));
+        }
         userDao.updateUser(id, updatedUser);
     }
 
